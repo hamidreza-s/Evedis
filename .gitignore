@@ -1,0 +1,12 @@
+ebin
+deps
+logs
+.rebar
+\#*
+\.\#*
+.DS_Store
+erl_crash.dump
+test/logs
+*.o
+*.so
+*.beam

@@ -1,0 +1,12 @@
+{application, evedis,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { evedis_app, []}},
+  {env, []}
+ ]}.
