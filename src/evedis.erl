@@ -1,11 +1,21 @@
 -module(evedis).
 
--export([init/0, ping/0]).
+-export([
+	 start/0,
+	 ping/0,
+	 reflect/1,
+	 set/2,
+	 get/1
+	]).
 
-ping() ->
-    "NIF library not loaded".
+-define(ERR_NIF_NOT_LOADED, "NIF library not loaded!~n").
 
-init() ->
+start() ->
+    ok = load(),
+    ok = init(),
+    ok.
+
+load() ->
     PrivDir = filename:join("..", "priv"),
     SoName = ?MODULE,
     SoPath = case code:priv_dir(?MODULE) of
@@ -21,3 +31,23 @@ init() ->
 		     filename:join(Dir, SoName)
 	     end,
     erlang:load_nif(SoPath, application:get_all_env(?MODULE)).
+
+init() ->
+    ?ERR_NIF_NOT_LOADED.
+
+ping() ->
+    ?ERR_NIF_NOT_LOADED.    
+
+reflect(_BinObj) ->
+    ?ERR_NIF_NOT_LOADED.
+
+set(_BinKey, _BinValue) ->
+    ?ERR_NIF_NOT_LOADED.
+
+get(_BinKey) ->
+    ?ERR_NIF_NOT_LOADED.
+
+
+
+
+

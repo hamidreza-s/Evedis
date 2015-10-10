@@ -2,11 +2,13 @@ ebin
 deps
 logs
 .rebar
+.emacs
 \#*
 \.\#*
 .DS_Store
 erl_crash.dump
 test/logs
 *.o
+*.d
 *.so
 *.beam
