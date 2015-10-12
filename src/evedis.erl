@@ -8,6 +8,10 @@
 	 get/1
 	]).
 
+-export([
+	 disk_commit/0
+	]).
+
 -define(ERR_NIF_NOT_LOADED, "NIF library not loaded!~n").
 
 start() ->
@@ -47,6 +51,8 @@ set(_BinKey, _BinValue) ->
 get(_BinKey) ->
     ?ERR_NIF_NOT_LOADED.
 
+disk_commit() ->
+    ?ERR_NIF_NOT_LOADED.
 
 
 

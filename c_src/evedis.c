@@ -8,6 +8,10 @@ static vedis *p_store;
 
 static ERL_NIF_TERM
 evedis_init(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+
+  /* @TODO: add disc storage by params */
+  /* @TODO: add api for vedis_commit */
+  
   int rc;
   rc = vedis_open(&p_store, ":mem:");
   if(rc != VEDIS_OK) {
@@ -33,21 +37,30 @@ evedis_set(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
   ErlNifBinary key_bin;
   ErlNifBinary val_bin;
-  enif_inspect_binary(env, argv[0], &key_bin);
-  enif_inspect_binary(env, argv[1], &val_bin);
-  
-  char *cmd = (char*) malloc(sizeof(char));
-  int rc;
 
+  if(!enif_inspect_binary(env, argv[0], &key_bin) ||
+     !enif_inspect_binary(env, argv[1], &val_bin)) {
+    return enif_make_badarg(env);
+  }
+
+  /* @TODO: alloc memory from stack instead of heap for cmd */
+  
+  char *cmd = (char*) enif_alloc(sizeof(char));
+  int rc;
+  
   strcpy(cmd, "SET ");
   strcat(cmd, (const char*) key_bin.data);
   strcat(cmd, " ");
-  strcat(cmd, (const char*) val_bin.data);
+  strcat(cmd, (const char*) val_bin.data); 
   
   rc = vedis_exec(p_store, cmd, -1);
+  
+  enif_free(cmd);
+
   if(rc != VEDIS_OK) {
     return enif_make_atom(env, "error");
   }
+
   return enif_make_atom(env, "ok");
 }
 
@@ -55,9 +68,14 @@ static ERL_NIF_TERM
 evedis_get(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
   ErlNifBinary key_bin;
-  enif_inspect_binary(env, argv[0], &key_bin);
 
-  char *cmd = (char*) malloc(sizeof(char));
+  if(!enif_inspect_binary(env, argv[0], &key_bin)) {
+    return enif_make_badarg(env);
+  }
+
+  /* @TODO: alloc memory from stack instead of heap for cmd */
+  
+  char *cmd = (char*) enif_alloc(sizeof(char));
   int rc;
   vedis_value *p_result;
 
@@ -66,6 +84,8 @@ evedis_get(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   
   vedis_exec(p_store, cmd, -1);
   rc = vedis_exec_result(p_store, &p_result);
+  enif_free(cmd);
+
   if(rc != VEDIS_OK) {
     return enif_make_atom(env, "error");
   }
@@ -78,8 +98,18 @@ evedis_get(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   
   enif_alloc_binary(res_size, &res_bin);
   res_bin.size = res_size;
-  strcpy(res_bin.data, res);
+  strcpy((char*) res_bin.data, res);
   return enif_make_binary(env, &res_bin);
+}
+
+static ERL_NIF_TERM
+evedis_disk_commit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+  int rc;
+  rc = vedis_commit(p_store);
+  if(rc != VEDIS_OK) {
+    return enif_make_atom(env, "error");
+  }
+  return enif_make_atom(env, "ok");
 }
 
 static ErlNifFunc
@@ -88,7 +118,8 @@ nif_funcs[] = {
   {"ping", 0, evedis_ping},
   {"reflect", 1, evedis_reflect},
   {"set", 2, evedis_set},
-  {"get", 1, evedis_get}
+  {"get", 1, evedis_get},
+  {"disk_commit", 0, evedis_disk_commit}
 };
 
 ERL_NIF_INIT(evedis, nif_funcs, NULL, NULL, NULL, NULL)
