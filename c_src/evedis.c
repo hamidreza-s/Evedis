@@ -5,13 +5,11 @@
 #include "vedis.h"
 
 static vedis *p_store;
+static vedis_value *p_result;
 
 static ERL_NIF_TERM
 evedis_init(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
-  /* @TODO: add disc storage by params */
-  /* @TODO: add api for vedis_commit */
-  
   int rc;
   rc = vedis_open(&p_store, ":mem:");
   if(rc != VEDIS_OK) {
@@ -34,65 +32,57 @@ evedis_reflect(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
 static ERL_NIF_TERM
 evedis_set(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-
+  
   ErlNifBinary key_bin;
   ErlNifBinary val_bin;
-
+  
   if(!enif_inspect_binary(env, argv[0], &key_bin) ||
      !enif_inspect_binary(env, argv[1], &val_bin)) {
     return enif_make_badarg(env);
   }
-
-  /* @TODO: alloc memory from stack instead of heap for cmd */
   
-  char *cmd = (char*) enif_alloc(sizeof(char));
   int rc;
-  
+  char *cmd = (char*) enif_alloc(100);
   strcpy(cmd, "SET ");
-  strcat(cmd, (const char*) key_bin.data);
+  strncat(cmd, (const char*) key_bin.data, key_bin.size);
   strcat(cmd, " ");
-  strcat(cmd, (const char*) val_bin.data); 
-  
+  strncat(cmd, (const char*) val_bin.data, val_bin.size); 
   rc = vedis_exec(p_store, cmd, -1);
-  
   enif_free(cmd);
-
+  
   if(rc != VEDIS_OK) {
     return enif_make_atom(env, "error");
   }
-
+  
   return enif_make_atom(env, "ok");
 }
 
 static ERL_NIF_TERM
 evedis_get(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-
+  
   ErlNifBinary key_bin;
-
+  
   if(!enif_inspect_binary(env, argv[0], &key_bin)) {
     return enif_make_badarg(env);
   }
-
-  /* @TODO: alloc memory from stack instead of heap for cmd */
   
-  char *cmd = (char*) enif_alloc(sizeof(char));
+  char *cmd = (char*) enif_alloc(100);
   int rc;
-  vedis_value *p_result;
-
+  
   strcpy(cmd, "GET ");
-  strcat(cmd, (const char*) key_bin.data);
+  strncat(cmd, (const char*) key_bin.data, key_bin.size);
   
   vedis_exec(p_store, cmd, -1);
   rc = vedis_exec_result(p_store, &p_result);
   enif_free(cmd);
-
+  
   if(rc != VEDIS_OK) {
     return enif_make_atom(env, "error");
   }
-
+  
   const char *res;
   res = vedis_value_to_string(p_result, 0);
-
+  
   ErlNifBinary res_bin;
   int res_size = strlen(res);
   

@@ -53,7 +53,3 @@ get(_BinKey) ->
 
 disk_commit() ->
     ?ERR_NIF_NOT_LOADED.
-
-
-
-
