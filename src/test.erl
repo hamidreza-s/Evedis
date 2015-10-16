@@ -2,17 +2,17 @@
 -compile(export_all).
 
 test_1() ->
-    Key0 = <<"K1">>,
-    Val0 = <<"V1">>,
+    Key0 = <<"K">>,
+    Val0 = <<"V">>,
 
-    Key1 = <<"=----key1----=">>,
-    Val1 = <<"=----val1----=">>,
+    Key1 = <<"=----key----=">>,
+    Val1 = <<"=----val----=">>,
     
-    Key2 = <<"=----key2----=">>,
-    Val2 = <<"=----val2----=">>,
+    Key2 = <<"=----KEY----=">>,
+    Val2 = <<"=----VAL----=">>,
 
-    Key3 = <<"K2">>,
-    Val3 = <<"=----V2----=">>,
+    Key3 = <<"K1">>,
+    Val3 = <<"=----V1----=">>,
 
     Key4 = <<"1">>,
     Val4 = <<"1">>,
@@ -20,8 +20,11 @@ test_1() ->
     Key5 = <<"1111">>,
     Val5 = <<"1111">>,
     
-    Key6 = <<"=----K2----=">>,
-    Val6 = <<"V2">>,
+    Key6 = <<"=----K1----=">>,
+    Val6 = <<"V1">>,
+
+    Key7 = <<"=-----------------------------------K----------------------------------------=">>,
+    Val7 = <<"=-----------------------------------V----------------------------------------=">>,
 
     R0 = evedis:set(Key0, Val0),
     R1 = evedis:set(Key1, Val1),
@@ -30,14 +33,16 @@ test_1() ->
     R4 = evedis:set(Key4, Val4),
     R5 = evedis:set(Key5, Val5),
     R6 = evedis:set(Key6, Val6),
+    R7 = evedis:set(Key7, Val7),
 
     {{R0, evedis:get(Key0)},
-     {R1, evedis:get(Key1)}, 
-     {R2, evedis:get(Key2)}, 
+     {R1, evedis:get(Key1)},
+     {R2, evedis:get(Key2)},
      {R3, evedis:get(Key3)},
      {R4, evedis:get(Key4)},
      {R5, evedis:get(Key5)},
-     {R6, evedis:get(Key6)}}.
+     {R6, evedis:get(Key6)},
+     {R7, evedis:get(Key7)}}.
 
 test_2() ->
     Val = <<"v">>,

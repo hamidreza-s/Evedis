@@ -42,7 +42,8 @@ evedis_set(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   }
   
   int rc;
-  char *cmd = (char*) enif_alloc(100);
+  int cmd_size = key_bin.size + val_bin.size + 6;
+  char *cmd = (char*) enif_alloc(cmd_size);
   strcpy(cmd, "SET ");
   strncat(cmd, (const char*) key_bin.data, key_bin.size);
   strcat(cmd, " ");
@@ -65,8 +66,9 @@ evedis_get(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   if(!enif_inspect_binary(env, argv[0], &key_bin)) {
     return enif_make_badarg(env);
   }
-  
-  char *cmd = (char*) enif_alloc(100);
+
+  int cmd_size = key_bin.size + 5;
+  char *cmd = (char*) enif_alloc(cmd_size);
   int rc;
   
   strcpy(cmd, "GET ");
