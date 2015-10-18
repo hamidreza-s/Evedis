@@ -7,6 +7,8 @@
                   kernel,
                   stdlib
                  ]},
-  {mod, { evedis_app, []}},
-  {env, []}
+  {mod, {evedis_app, []}},
+  {env, [
+	 {storage, memory} %% memory | disk
+	]}
  ]}.
