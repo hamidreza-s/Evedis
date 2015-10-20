@@ -14,6 +14,9 @@ static ERL_NIF_TERM
 evedis_nif_init(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
 static ERL_NIF_TERM
+evedis_nif_close(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+
+static ERL_NIF_TERM
 evedis_nif_ping(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
 static ERL_NIF_TERM
@@ -30,6 +33,7 @@ static ErlNifFunc
 nif_funcs[] = {
   {"init", 0, evedis_nif_init},
   {"init", 1, evedis_nif_init},
+  {"close", 0, evedis_nif_close},
   {"ping", 0, evedis_nif_ping},
   {"command", 1, evedis_nif_command}
 };
@@ -49,28 +53,36 @@ ERL_NIF_INIT(evedis, nif_funcs, NULL, NULL, NULL, NULL)
 static ERL_NIF_TERM
 evedis_nif_init(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
-  char *storage_type = (char*) enif_alloc(100);
+  char *storage_type = (char*) enif_alloc(1000);
   ErlNifBinary storage_path;
   
   if(argc == 0) {
     strcpy(storage_type, ":mem:");
-  } else { 
+  } else {
     if(!enif_inspect_binary(env, argv[0], &storage_path)) {
       return enif_make_badarg(env);
     }
     strncpy(storage_type,
-	    (const char*) storage_path.data,
-	    storage_path.size);
+  	    (const char*) storage_path.data,
+  	    storage_path.size);
   }
-
-  enif_free(storage_type);
 
   int rc;
   rc = vedis_open(&p_store, (const char*) storage_type);
+  enif_free(storage_type);
   if(rc != VEDIS_OK) {
     return enif_make_atom(env, "error");
   }  
-  return enif_make_atom(env, "ok");  
+  return enif_make_atom(env, "ok");
+}
+
+/*----------------------------------------------------------------*/
+/* evedis_nif_close */
+/*----------------------------------------------------------------*/
+static ERL_NIF_TERM
+evedis_nif_close(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+  vedis_close(p_store);
+  return enif_make_atom(env, "ok");
 }
 
 /*----------------------------------------------------------------*/
@@ -124,10 +136,9 @@ evedis_priv_exec(ErlNifEnv *env, char *cmd) {
     return enif_make_atom(env, "error");
   }
   
-
   if(vedis_value_is_null(p_result)){
 
-    return enif_make_atom(env, "undefined");
+    return enif_make_atom(env, "not_found");
 
   }else if(vedis_value_is_array(p_result)) {
 
@@ -141,15 +152,21 @@ evedis_priv_exec(ErlNifEnv *env, char *cmd) {
       const char *res;
       ErlNifBinary res_bin;
       int res_size;
-      
-      res = vedis_value_to_string(p_entry, 0);
-      res_size = strlen(res);
 
-      enif_alloc_binary(res_size, &res_bin);
-      res_bin.size = res_size;
-      strcpy((char*) res_bin.data, res);
-      res_arr[cnt++] = enif_make_binary(env, &res_bin);
+      if(vedis_value_is_null(p_entry)) {
+	
+	res_arr[cnt++] = enif_make_atom(env, "not_found");
+	
+      }else{
       
+	res = vedis_value_to_string(p_entry, 0);
+	res_size = strlen(res);
+	
+	enif_alloc_binary(res_size, &res_bin);
+	res_bin.size = res_size;
+	strcpy((char*) res_bin.data, res);
+	res_arr[cnt++] = enif_make_binary(env, &res_bin);
+      }
     }
     
     return enif_make_list_from_array(env, res_arr, cnt);

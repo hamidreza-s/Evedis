@@ -13,3 +13,8 @@ compile: deps
 
 live: compile
 	@exec erl -pa ./ebin -s evedis
+
+test: compile
+	@mkdir -p ./test/logs
+	@exec ct_run -dir ./test -include ./include \
+		-pa ./ebin -logdir ./test/logs
