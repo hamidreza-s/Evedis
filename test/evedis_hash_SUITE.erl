@@ -66,23 +66,33 @@ end_per_testcase(_TestCase, Config) ->
 test_evedis_hash(_Config) ->
     
     %%----------------------------------------------------------------
+    %% create database
+    %%----------------------------------------------------------------
+
+    ?assertEqual({ok, hash_test}, evedis:create(hash_test, [])),
+
+    %%----------------------------------------------------------------
     %% set and setx
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"true">>, evedis_hash:set(<<"id-181">>,
+    ?assertEqual(<<"true">>, evedis_hash:set(hash_test,
+					     <<"id-181">>,
 					     <<"name">>,
 					     <<"Hamidreza">>)),
 
 
-    ?assertEqual(<<"false">>, evedis_hash:setnx(<<"id-181">>,
+    ?assertEqual(<<"false">>, evedis_hash:setnx(hash_test,
+						<<"id-181">>,
 						<<"name">>,
 						<<"Hamidreza">>)),
 
-    ?assertEqual(<<"true">>, evedis_hash:set(<<"id-181">>,
+    ?assertEqual(<<"true">>, evedis_hash:set(hash_test,
+					     <<"id-181">>,
 					     <<"age">>,
 					     <<"28">>)),
 
-    ?assertEqual(<<"true">>, evedis_hash:set(<<"id-181">>,
+    ?assertEqual(<<"true">>, evedis_hash:set(hash_test,
+					     <<"id-181">>,
 					     <<"language">>,
 					     <<"Persian">>)), 
 
@@ -90,48 +100,60 @@ test_evedis_hash(_Config) ->
     %% get
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"Hamidreza">>, evedis_hash:get(<<"id-181">>,
+    ?assertEqual(<<"Hamidreza">>, evedis_hash:get(hash_test,
+						  <<"id-181">>,
 						  <<"name">>)),
 
-    ?assertEqual(<<"28">>, evedis_hash:get(<<"id-181">>,
+    ?assertEqual(<<"28">>, evedis_hash:get(hash_test,
+					   <<"id-181">>,
 					   <<"age">>)),
     
-    ?assertEqual(not_found, evedis_hash:get(<<"id-181">>,
+    ?assertEqual(not_found, evedis_hash:get(hash_test,
+					    <<"id-181">>,
 					    <<"job">>)),
-
 
     %%----------------------------------------------------------------
     %% del
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"1">>, evedis_hash:del(<<"id-181">>, [<<"age">>])),
-    ?assertEqual(not_found, evedis_hash:get(<<"id-181">>, <<"age">>)),
+    ?assertEqual(<<"1">>, evedis_hash:del(hash_test, 
+					  <<"id-181">>, 
+					  [<<"age">>])),
+
+    ?assertEqual(not_found, evedis_hash:get(hash_test, 
+					    <<"id-181">>, 
+					    <<"age">>)),
 
     %%----------------------------------------------------------------
     %% len
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"2">>, evedis_hash:len(<<"id-181">>)),
+    ?assertEqual(<<"2">>, evedis_hash:len(hash_test, <<"id-181">>)),
 
     %%----------------------------------------------------------------
     %% exists
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"true">>, evedis_hash:exists(<<"id-181">>, <<"name">>)),
-    ?assertEqual(<<"false">>, evedis_hash:exists(<<"id-181">>, <<"job">>)),
+    ?assertEqual(<<"true">>, evedis_hash:exists(hash_test, 
+						<<"id-181">>, 
+						<<"name">>)),
+
+    ?assertEqual(<<"false">>, evedis_hash:exists(hash_test,
+						 <<"id-181">>, 
+						 <<"job">>)),
 
     %%----------------------------------------------------------------
     %% keys
     %%----------------------------------------------------------------
 
     ?assertEqual([<<"name">>, <<"language">>], 
-		 evedis_hash:keys(<<"id-181">>)),
+		 evedis_hash:keys(hash_test, <<"id-181">>)),
 
     %%----------------------------------------------------------------
     %% vals
     %%----------------------------------------------------------------
     ?assertEqual([<<"Hamidreza">>, <<"Persian">>],
-		 evedis_hash:vals(<<"id-181">>)),
+		 evedis_hash:vals(hash_test, <<"id-181">>)),
 
     %%----------------------------------------------------------------
     %% getall
@@ -139,13 +161,14 @@ test_evedis_hash(_Config) ->
 
     ?assertEqual([<<"name">>, <<"Hamidreza">>, 
 		  <<"language">>, <<"Persian">>],
-		 evedis_hash:getall(<<"id-181">>)),
+		 evedis_hash:getall(hash_test, <<"id-181">>)),
 
     %%----------------------------------------------------------------
     %% mset
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"2">>, evedis_hash:mset(<<"id-191">>,
+    ?assertEqual(<<"2">>, evedis_hash:mset(hash_test,
+					   <<"id-191">>,
 					   [{<<"-k1-">>, <<"-v1-">>},
 					    {<<"-k2-">>, <<"-v2-">>}])),
 
@@ -154,6 +177,8 @@ test_evedis_hash(_Config) ->
     %%----------------------------------------------------------------
 
     ?assertEqual([<<"-v1-">>, <<"-v2-">>],
-		 evedis_hash:mget(<<"id-191">>, [<<"-k1-">>, <<"-k2-">>])),
+		 evedis_hash:mget(hash_test,
+				  <<"id-191">>, 
+				  [<<"-k1-">>, <<"-k2-">>])),
 
     ok.

@@ -1,8 +1,8 @@
 -module(evedis_hash).
 
--export([get/2, set/3, del/2, len/1,
-	 exists/2, mget/2, keys/1, vals/1,
-	 getall/1, mset/2, setnx/3]).
+-export([get/3, set/4, del/3, len/2,
+	 exists/3, mget/3, keys/2, vals/2,
+	 getall/2, mset/3, setnx/4]).
 
 %%====================================================================
 %% Hash Built-in Functions (BIFs)
@@ -14,8 +14,9 @@
 %% Returns the value associated with field in the hash stored at key.
 %% @end
 %%--------------------------------------------------------------------
-get(Key, Field) ->
-    evedis:command(<<"HGET ", Key/binary, " ", Field/binary>>).
+get(DBName, Key, Field) ->
+    evedis:command(DBName, 
+		   <<"HGET ", Key/binary, " ", Field/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -23,8 +24,9 @@ get(Key, Field) ->
 %% Sets field in the hash stored at key to value. 
 %% @end
 %%--------------------------------------------------------------------
-set(Key, Field, Val) ->
-    evedis:command(<<"HSET ", Key/binary, " ", 
+set(DBName, Key, Field, Val) ->
+    evedis:command(DBName, 
+		   <<"HSET ", Key/binary, " ", 
 		     Field/binary, " ", Val/binary>>).
 
 %%--------------------------------------------------------------------
@@ -33,12 +35,12 @@ set(Key, Field, Val) ->
 %% Removes the specified fields from the hash stored at key. 
 %% @end
 %%--------------------------------------------------------------------
-del(Key, FieldList) ->
-    do_del(FieldList, <<"HDEL ", Key/binary>>).
-do_del([Field|Tail], Cmd) ->
-    do_del(Tail, <<Cmd/binary, " ", Field/binary>>);
-do_del([], Cmd) ->
-    evedis:command(Cmd).
+del(DBName, Key, FieldList) ->
+    do_del(DBName, FieldList, <<"HDEL ", Key/binary>>).
+do_del(DBName, [Field|Tail], Cmd) ->
+    do_del(DBName, Tail, <<Cmd/binary, " ", Field/binary>>);
+do_del(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -46,8 +48,8 @@ do_del([], Cmd) ->
 %% Returns the number of fields contained in the hash stored at key.
 %% @end
 %%--------------------------------------------------------------------
-len(Key) ->
-    evedis:command(<<"HLEN ", Key/binary>>).
+len(DBName, Key) ->
+    evedis:command(DBName, <<"HLEN ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -55,8 +57,9 @@ len(Key) ->
 %% Returns if field is an existing field in the hash stored at key.
 %% @end
 %%--------------------------------------------------------------------
-exists(Key, Field) ->
-    evedis:command(<<"HEXISTS ", Key/binary, " ", Field/binary>>).
+exists(DBName, Key, Field) ->
+    evedis:command(DBName, 
+		   <<"HEXISTS ", Key/binary, " ", Field/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -65,12 +68,12 @@ exists(Key, Field) ->
 %% hash stored at key.
 %% @end
 %%--------------------------------------------------------------------
-mget(Key, FieldList) ->
-    do_mget(FieldList, <<"HMGET ", Key/binary>>).
-do_mget([Field|Tail], Cmd) ->
-    do_mget(Tail, <<Cmd/binary, " ", Field/binary>>);
-do_mget([], Cmd) ->
-    evedis:command(Cmd).
+mget(DBName, Key, FieldList) ->
+    do_mget(DBName, FieldList, <<"HMGET ", Key/binary>>).
+do_mget(DBName, [Field|Tail], Cmd) ->
+    do_mget(DBName, Tail, <<Cmd/binary, " ", Field/binary>>);
+do_mget(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -78,8 +81,8 @@ do_mget([], Cmd) ->
 %% Returns all field names in the hash stored at key.
 %% @end
 %%--------------------------------------------------------------------
-keys(Key) ->
-    evedis:command(<<"HKEYS ", Key/binary>>).
+keys(DBName, Key) ->
+    evedis:command(DBName, <<"HKEYS ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -87,8 +90,8 @@ keys(Key) ->
 %% Returns all field values in the hash stored at key.
 %% @end
 %%--------------------------------------------------------------------
-vals(Key) ->
-    evedis:command(<<"HVALS ", Key/binary>>).
+vals(DBName, Key) ->
+    evedis:command(DBName, <<"HVALS ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -96,8 +99,8 @@ vals(Key) ->
 %% Returns all fields and values of the hash stored at key.
 %% @end
 %%--------------------------------------------------------------------
-getall(Key) ->
-    evedis:command(<<"HGETALL ", Key/binary>>).
+getall(DBName, Key) ->
+    evedis:command(DBName, <<"HGETALL ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -106,12 +109,13 @@ getall(Key) ->
 %% in the hash stored at key. 
 %% @end
 %%--------------------------------------------------------------------
-mset(Key, FieldValList) ->
-    do_mset(FieldValList, <<"HMSET ", Key/binary>>).
-do_mset([{Field, Val}|Tail], Cmd) ->
-    do_mset(Tail, <<Cmd/binary, " ", Field/binary, " ", Val/binary>>);
-do_mset([], Cmd) ->
-    evedis:command(Cmd).
+mset(DBName, Key, FieldValList) ->
+    do_mset(DBName, FieldValList, <<"HMSET ", Key/binary>>).
+do_mset(DBName, [{Field, Val}|Tail], Cmd) ->
+    do_mset(DBName, Tail, 
+	    <<Cmd/binary, " ", Field/binary, " ", Val/binary>>);
+do_mset(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -120,6 +124,7 @@ do_mset([], Cmd) ->
 %% only if field does not yet exist. 
 %% @end
 %%--------------------------------------------------------------------
-setnx(Key, Field, Val) ->
-    evedis:command(<<"HSETNX ", Key/binary, " ",
+setnx(DBName, Key, Field, Val) ->
+    evedis:command(DBName, 
+		   <<"HSETNX ", Key/binary, " ",
 		     Field/binary, " ", Val/binary>>).

@@ -1,7 +1,7 @@
 -module(evedis_string).
 
--export([getcsv/1, strip_tag/1, str_split/1, size_fmt/1,
-	 soundex/1, base64/1, base64_dec/1]).
+-export([getcsv/2, strip_tag/2, str_split/2, size_fmt/2,
+	 soundex/2, base64/2, base64_dec/2]).
 
 %%====================================================================
 %% String Built-in Functions (BIFs)
@@ -13,8 +13,8 @@
 %% Parse a CSV string into a array.
 %% @end
 %%--------------------------------------------------------------------
-getcsv(Input) ->
-    evedis:command(<<"GETCSV ", Input/binary>>).
+getcsv(DBName, Input) ->
+    evedis:command(DBName, <<"GETCSV ", Input/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -22,8 +22,8 @@ getcsv(Input) ->
 %% Strip HTML tags from a string. 
 %% @end
 %%--------------------------------------------------------------------
-strip_tag(Input) ->
-    evedis:command(<<"STRIP_TAG ", Input/binary>>).
+strip_tag(DBName, Input) ->
+    evedis:command(DBName, <<"STRIP_TAG ", Input/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -31,8 +31,8 @@ strip_tag(Input) ->
 %% Split a string into an indexed array. 
 %% @end
 %%--------------------------------------------------------------------
-str_split(Input) ->
-    evedis:command(<<"STR_SPLIT ", Input/binary>>).
+str_split(DBName, Input) ->
+    evedis:command(DBName, <<"STR_SPLIT ", Input/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -41,8 +41,8 @@ str_split(Input) ->
 %% the given size [i.e: 64-bit integer]. 
 %% @end
 %%--------------------------------------------------------------------
-size_fmt(IntSize) ->
-    evedis:command(<<"SIZE_FMT ", IntSize/binary>>).
+size_fmt(DBName, IntSize) ->
+    evedis:command(DBName, <<"SIZE_FMT ", IntSize/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -50,8 +50,8 @@ size_fmt(IntSize) ->
 %% Calculate the soundex key of a string.
 %% @end
 %%--------------------------------------------------------------------
-soundex(String) ->
-    evedis:command(<<"SOUNDEX ", String/binary>>).
+soundex(DBName, String) ->
+    evedis:command(DBName, <<"SOUNDEX ", String/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -59,8 +59,8 @@ soundex(String) ->
 %% Encode input with MIME base64. 
 %% @end
 %%--------------------------------------------------------------------
-base64(Input) ->
-    evedis:command(<<"BASE64 ", Input/binary>>).
+base64(DBName, Input) ->
+    evedis:command(DBName, <<"BASE64 ", Input/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -68,5 +68,5 @@ base64(Input) ->
 %% decode MIME base64 based input. 
 %% @end
 %%--------------------------------------------------------------------
-base64_dec(Input) ->
-    evedis:command(<<"BASE64_DEC ", Input/binary>>).
+base64_dec(DBName, Input) ->
+    evedis:command(DBName, <<"BASE64_DEC ", Input/binary>>).

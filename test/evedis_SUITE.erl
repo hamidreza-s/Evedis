@@ -1,4 +1,4 @@
--module(evedis_set_SUITE).
+-module(evedis_SUITE).
 
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
@@ -61,77 +61,68 @@ end_per_testcase(_TestCase, Config) ->
 %%====================================================================
 
 %%--------------------------------------------------------------------
-%% test_evedis_set
+%% test_evedis
 %%--------------------------------------------------------------------
-test_evedis_set(_Config) ->
+test_evedis(_Config) ->
+
+    %%----------------------------------------------------------------
+    %% create and use disk storage database
+    %%----------------------------------------------------------------
+
+    ?assertEqual({ok, db1},
+		 evedis:create(db1,
+			       [{storage_type, disk}, 
+				{storage_path, "/tmp/"}])),
+
+    ?assertEqual(<<"true">>, evedis:command(db1, <<"SET foo bar">>)),
+
+    ?assertEqual(<<"bar">>, evedis:command(db1, <<"GET foo">>)),
+    
+    ?assertEqual({ok, db2}, 
+		 evedis:create(db2,
+			       [{storage_type, disk}, 
+				{storage_path, "/tmp/"}])),
+		 
+    ?assertEqual(<<"true">>, evedis:command(db2, <<"SET foo ban">>)),
+    
+    ?assertEqual(<<"ban">>, evedis:command(db2, <<"GET foo">>)),
+    
+
+    %%----------------------------------------------------------------
+    %% create and use memory storage database
+    %%----------------------------------------------------------------
+
+    ?assertEqual({ok, db3},
+		 evedis:create(db3, [{storage_type, memory}])),
+
+    ?assertEqual(<<"true">>, evedis:command(db3, <<"SET foo bar">>)),
+
+    ?assertEqual(<<"bar">>, evedis:command(db3, <<"GET foo">>)),
+    
+    ?assertEqual({ok, db4}, 
+		 evedis:create(db4,
+			       [{storage_type, memory}])),
+		 
+    ?assertEqual(<<"true">>, evedis:command(db4, <<"SET foo ban">>)),
+    
+    ?assertEqual(<<"ban">>, evedis:command(db4, <<"GET foo">>)),
     
     %%----------------------------------------------------------------
-    %% create database
+    %% create dublicated database
     %%----------------------------------------------------------------
 
-    ?assertEqual({ok, set_test}, evedis:create(set_test, [])),
+    ?assertEqual(db_already_exists,
+		 evedis:create(db1,
+			       [{storage_type, disk}, 
+				{storage_path, "/tmp/"}])),
+
+    ?assertEqual(db_already_exists,
+		 evedis:create(db3, [{storage_type, memory}])),
 
     %%----------------------------------------------------------------
-    %% add
+    %% use a database which does not exist
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"3">>, evedis_set:add(set_test, 
-					 <<"foo">>, [<<"bar">>,
-						     <<"bat">>,
-						     <<"ban">>])),
-
-    %%----------------------------------------------------------------
-    %% len
-    %%----------------------------------------------------------------
-
-    ?assertEqual(<<"3">>, evedis_set:len(set_test, <<"foo">>)),
-
-    %%----------------------------------------------------------------
-    %% ismember
-    %%----------------------------------------------------------------
-
-    ?assertEqual(<<"true">>, evedis_set:ismember(set_test, 
-						 <<"foo">>, <<"bat">>)),
-
-    ?assertEqual(<<"false">>, evedis_set:ismember(set_test, 
-						  <<"foo">>, <<"wrong">>)),
-
-    %%----------------------------------------------------------------
-    %% peek and top
-    %%----------------------------------------------------------------
-    
-    ?assertEqual(<<"ban">>, evedis_set:peek(set_test, <<"foo">>)),
-
-    ?assertEqual(<<"bar">>, evedis_set:top(set_test, <<"foo">>)),
-
-    %%----------------------------------------------------------------
-    %% pop and rem
-    %%----------------------------------------------------------------
-
-    ?assertEqual(<<"ban">>, evedis_set:pop(set_test, <<"foo">>)),
-
-    ?assertEqual(<<"1">>, evedis_set:'rem'(set_test,
-					   <<"foo">>, [<<"bar">>])),
-
-    %%----------------------------------------------------------------
-    %% members
-    %%----------------------------------------------------------------
-
-    ?assertEqual([<<"bat">>], evedis_set:members(set_test, <<"foo">>)),
-
-    %%----------------------------------------------------------------
-    %% add, inter and diff
-    %%----------------------------------------------------------------
-
-    ?assertEqual(<<"3">>, evedis_set:add(set_test, 
-					 <<"FOO">>, [<<"bar">>,
-						     <<"bat">>,
-						     <<"ban">>])),
-
-    ?assertEqual([<<"bat">>], 
-		 evedis_set:inter(set_test, [<<"FOO">>, <<"foo">>])),
-
-    ?assertEqual([<<"bar">>, <<"ban">>],
-		 evedis_set:diff(set_test, [<<"FOO">>, <<"foo">>])),
+    ?assertEqual(db_not_found, evedis:command(wrong_db, <<"SET foo ban">>)),
 
     ok.

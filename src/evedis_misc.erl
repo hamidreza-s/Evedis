@@ -1,9 +1,9 @@
 -module(evedis_misc).
 
--export([rand/2, getrandmax/0, randstr/1, time/0,
-	date/0, os/0, echo/1, abort/0, cmd_list/0,
-	table_list/0, vedis/0, commit/0, rollback/0,
-	'begin'/0]).
+-export([rand/3, getrandmax/1, randstr/2, time/1,
+	date/1, os/1, echo/2, abort/1, cmd_list/1,
+	table_list/1, vedis/1, commit/1, rollback/1,
+	'begin'/1]).
 
 %%====================================================================
 %% Misc. Built-in Functions (BIFs)
@@ -15,8 +15,8 @@
 %% Generate a random (unsigned 32-bit) integer. 
 %% @end
 %%--------------------------------------------------------------------
-rand(Min, Max) ->
-    evedis:command(<<"RAND ", Min/binary, " ", Max/binary>>).
+rand(DBName, Min, Max) ->
+    evedis:command(DBName, <<"RAND ", Min/binary, " ", Max/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -24,8 +24,8 @@ rand(Min, Max) ->
 %% Show largest possible random value.
 %% @end
 %%--------------------------------------------------------------------
-getrandmax() ->
-    evedis:command(<<"GETRANDMAX">>).
+getrandmax(DBName) ->
+    evedis:command(DBName, <<"GETRANDMAX">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -33,8 +33,8 @@ getrandmax() ->
 %% Generate a random string (English alphabet).
 %% @end
 %%--------------------------------------------------------------------
-randstr(Len) ->
-    evedis:command(<<"RANDSTR ", Len/binary>>).
+randstr(DBName, Len) ->
+    evedis:command(DBName, <<"RANDSTR ", Len/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -42,8 +42,8 @@ randstr(Len) ->
 %% Return the current time (GMT).
 %% @end
 %%--------------------------------------------------------------------
-time() ->
-    evedis:command(<<"TIME">>).
+time(DBName) ->
+    evedis:command(DBName, <<"TIME">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -51,8 +51,8 @@ time() ->
 %% Return the current date.
 %% @end
 %%--------------------------------------------------------------------
-date() ->
-    evedis:command(<<"DATE">>).
+date(DBName) ->
+    evedis:command(DBName, <<"DATE">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -60,8 +60,8 @@ date() ->
 %% Return a brief description of the host operating system. 
 %% @end
 %%--------------------------------------------------------------------
-os() ->
-    evedis:command(<<"OS">>).
+os(DBName) ->
+    evedis:command(DBName, <<"OS">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -69,8 +69,8 @@ os() ->
 %% Return the given argument.
 %% @end
 %%--------------------------------------------------------------------
-echo(Msg) ->
-    evedis:command(<<"ECHO ", Msg/binary>>).
+echo(DBName, Msg) ->
+    evedis:command(DBName, <<"ECHO ", Msg/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -78,8 +78,8 @@ echo(Msg) ->
 %% Throw an error message and abort execution. 
 %% @end
 %%--------------------------------------------------------------------
-abort() ->
-    evedis:command(<<"ABORT">>).
+abort(DBName) ->
+    evedis:command(DBName, <<"ABORT">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -87,8 +87,8 @@ abort() ->
 %% Return an indexed array holding the list of installed vedis commands. 
 %% @end
 %%--------------------------------------------------------------------
-cmd_list() ->
-    evedis:command(<<"CMD_LIST">>).
+cmd_list(DBName) ->
+    evedis:command(DBName, <<"CMD_LIST">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -97,8 +97,8 @@ cmd_list() ->
 %% tables (i.e. Hashes, Sets, List) in memory.
 %% @end
 %%--------------------------------------------------------------------
-table_list() ->
-    evedis:command(<<"TABLE_LIST">>).
+table_list(DBName) ->
+    evedis:command(DBName, <<"TABLE_LIST">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -106,8 +106,8 @@ table_list() ->
 %% Expand the vedis signature and copyright notice.
 %% @end
 %%--------------------------------------------------------------------
-vedis() ->
-    evedis:command(<<"VEDIS">>).
+vedis(DBName) ->
+    evedis:command(DBName, <<"VEDIS">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -115,8 +115,8 @@ vedis() ->
 %% Commit an active write transaction.
 %% @end
 %%--------------------------------------------------------------------
-commit() ->
-    evedis:command(<<"COMMIT">>).
+commit(DBName) ->
+    evedis:command(DBName, <<"COMMIT">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -124,8 +124,8 @@ commit() ->
 %% Rollback a write transaction. 
 %% @end
 %%--------------------------------------------------------------------
-rollback() ->
-    evedis:command(<<"ROLLBACK">>).
+rollback(DBName) ->
+    evedis:command(DBName, <<"ROLLBACK">>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -133,5 +133,5 @@ rollback() ->
 %% Start a write transaction. 
 %% @end
 %%--------------------------------------------------------------------
-'begin'() ->
-    evedis:command(<<"BEGIN">>).
+'begin'(DBName) ->
+    evedis:command(DBName, <<"BEGIN">>).

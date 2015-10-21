@@ -1,10 +1,10 @@
 -module(evedis_kv).
 
--export([get/1, set/2, setnx/2, del/1, 
-	 append/2, exists/1, strlen/1, copy/2, 
-	 move/2, mget/1, mset/1, msetnx/1,
-	 getset/2, incr/1, decr/1, incrby/2,
-	 decrby/2]).
+-export([get/2, set/3, setnx/3, del/2, 
+	 append/3, exists/2, strlen/2, copy/3, 
+	 move/3, mget/2, mset/2, msetnx/2,
+	 getset/3, incr/2, decr/2, incrby/3,
+	 decrby/3]).
  
 %%====================================================================
 %% Key/Value Built-in Functions (BIFs)
@@ -17,8 +17,8 @@
 %% value null is returned.
 %% @end
 %%--------------------------------------------------------------------
-get(Key) -> 
-    evedis:command(<<"GET ", Key/binary>>).
+get(DBName, Key) -> 
+    evedis:command(DBName, <<"GET ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -26,8 +26,8 @@ get(Key) ->
 %% Set key to hold the string value.
 %% @end
 %%--------------------------------------------------------------------
-set(Key, Val) -> 
-    evedis:command(<<"SET ", Key/binary, " ", Val/binary>>).
+set(DBName, Key, Val) -> 
+    evedis:command(DBName, <<"SET ", Key/binary, " ", Val/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -35,8 +35,8 @@ set(Key, Val) ->
 %% Set key to hold string value if key does not exist.
 %% @end
 %%--------------------------------------------------------------------
-setnx(Key, Val) ->
-    evedis:command(<<"SETNX ", Key/binary, " ", Val/binary>>).
+setnx(DBName, Key, Val) ->
+    evedis:command(DBName, <<"SETNX ", Key/binary, " ", Val/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -44,8 +44,8 @@ setnx(Key, Val) ->
 %% Removes the specified keys. A key is ignored if it does not exist. 
 %% @end
 %%--------------------------------------------------------------------
-del(Key) -> 
-    evedis:command(<<"DEL ", Key/binary>>).
+del(DBName, Key) -> 
+    evedis:command(DBName, <<"DEL ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -54,8 +54,8 @@ del(Key) ->
 %% the value at the end of the string.
 %% @end
 %%--------------------------------------------------------------------
-append(Key, Val) ->
-     evedis:command(<<"APPEND ", Key/binary, " ", Val/binary>>).
+append(DBName, Key, Val) ->
+     evedis:command(DBName, <<"APPEND ", Key/binary, " ", Val/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -63,8 +63,8 @@ append(Key, Val) ->
 %% Check if a key already exists in the datastore. 
 %% @end
 %%--------------------------------------------------------------------
-exists(Key) ->
-    evedis:command(<<"EXISTS ", Key/binary>>).
+exists(DBName, Key) ->
+    evedis:command(DBName, <<"EXISTS ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -72,8 +72,8 @@ exists(Key) ->
 %% Returns the length of the string value stored at key.
 %% @end
 %%--------------------------------------------------------------------
-strlen(Key) ->
-    evedis:command(<<"STRLEN ", Key/binary>>).
+strlen(DBName, Key) ->
+    evedis:command(DBName, <<"STRLEN ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -81,8 +81,9 @@ strlen(Key) ->
 %% Copy key values. 
 %% @end
 %%--------------------------------------------------------------------
-copy(OldKey, NewVal) ->
-    evedis:command(<<"COPY ", OldKey/binary, " ", NewVal/binary>>).
+copy(DBName, OldKey, NewVal) ->
+    evedis:command(DBName, 
+		   <<"COPY ", OldKey/binary, " ", NewVal/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -90,8 +91,9 @@ copy(OldKey, NewVal) ->
 %% Move key values (remove old key).
 %% @end
 %%--------------------------------------------------------------------
-move(OldKey, NewVal) ->
-    evedis:command(<<"MOVE ", OldKey/binary, " ", NewVal/binary>>).
+move(DBName, OldKey, NewVal) ->
+    evedis:command(DBName, 
+		   <<"MOVE ", OldKey/binary, " ", NewVal/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -99,12 +101,12 @@ move(OldKey, NewVal) ->
 %% Returns the values of all specified keys.
 %% @end
 %%--------------------------------------------------------------------
-mget(KeyList) ->
-    do_mget(KeyList, <<"MGET">>).
-do_mget([Key|Tail], Cmd) ->
-    do_mget(Tail, <<Cmd/binary, " ", Key/binary>>);
-do_mget([], Cmd) ->
-    evedis:command(Cmd).
+mget(DBName, KeyList) ->
+    do_mget(DBName, KeyList, <<"MGET">>).
+do_mget(DBName, [Key|Tail], Cmd) ->
+    do_mget(DBName, Tail, <<Cmd/binary, " ", Key/binary>>);
+do_mget(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -112,12 +114,12 @@ do_mget([], Cmd) ->
 %% Sets the given keys to their respective values.
 %% @end
 %%--------------------------------------------------------------------
-mset(KeyValList) ->
-    do_mset(KeyValList, <<"MSET">>).
-do_mset([{Key, Val}|Tail], Cmd) ->
-    do_mset(Tail, <<Cmd/binary, " ", Key/binary, " ", Val/binary>>);
-do_mset([], Cmd) ->
-    evedis:command(Cmd).
+mset(DBName, KeyValList) ->
+    do_mset(DBName, KeyValList, <<"MSET">>).
+do_mset(DBName, [{Key, Val}|Tail], Cmd) ->
+    do_mset(DBName, Tail, <<Cmd/binary, " ", Key/binary, " ", Val/binary>>);
+do_mset(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -125,12 +127,12 @@ do_mset([], Cmd) ->
 %% Sets the given keys to their respective values.
 %% @end
 %%--------------------------------------------------------------------
-msetnx(KeyValList) ->
-    do_msetnx(KeyValList, <<"MSETNX">>).
-do_msetnx([{Key, Val}|Tail], Cmd) ->
-    do_msetnx(Tail, <<Cmd/binary, " ", Key/binary, " ", Val/binary>>);
-do_msetnx([], Cmd) ->
-    evedis:command(Cmd).
+msetnx(DBName, KeyValList) ->
+    do_msetnx(DBName, KeyValList, <<"MSETNX">>).
+do_msetnx(DBName, [{Key, Val}|Tail], Cmd) ->
+    do_msetnx(DBName, Tail, <<Cmd/binary, " ", Key/binary, " ", Val/binary>>);
+do_msetnx(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -138,8 +140,8 @@ do_msetnx([], Cmd) ->
 %% Atomically sets key to value and returns the old value stored at key.
 %% @end
 %%--------------------------------------------------------------------
-getset(Key, Val) ->
-    evedis:command(<<"GETSET ", Key/binary, " ", Val/binary>>).
+getset(DBName, Key, Val) ->
+    evedis:command(DBName, <<"GETSET ", Key/binary, " ", Val/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -147,8 +149,8 @@ getset(Key, Val) ->
 %% Increments the number stored at key by one.
 %% @end
 %%--------------------------------------------------------------------
-incr(Key) ->
-    evedis:command(<<"INCR ", Key/binary>>).
+incr(DBName, Key) ->
+    evedis:command(DBName, <<"INCR ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -156,8 +158,8 @@ incr(Key) ->
 %% Decrements the number stored at key by one.
 %% @end
 %%--------------------------------------------------------------------
-decr(Key) ->
-    evedis:command(<<"DECR ", Key/binary>>).
+decr(DBName, Key) ->
+    evedis:command(DBName, <<"DECR ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -165,8 +167,8 @@ decr(Key) ->
 %% Increments the number stored at key by increment.
 %% @end
 %%--------------------------------------------------------------------
-incrby(Key, Incr) ->
-    evedis:command(<<"INCRBY ", Key/binary, " ", Incr/binary>>).
+incrby(DBName, Key, Incr) ->
+    evedis:command(DBName, <<"INCRBY ", Key/binary, " ", Incr/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -174,8 +176,5 @@ incrby(Key, Incr) ->
 %% Decrements the number stored at key by decrement.
 %% @end
 %%--------------------------------------------------------------------
-decrby(Key, Decr) ->
-    evedis:command(<<"DECRBY ", Key/binary, " ", Decr/binary>>).
-
-
-
+decrby(DBName, Key, Decr) ->
+    evedis:command(DBName, <<"DECRBY ", Key/binary, " ", Decr/binary>>).

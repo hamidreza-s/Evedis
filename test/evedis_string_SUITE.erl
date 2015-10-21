@@ -66,11 +66,17 @@ end_per_testcase(_TestCase, Config) ->
 test_evedis_string(_Config) ->
     
     %%----------------------------------------------------------------
+    %% create database
+    %%----------------------------------------------------------------
+
+    ?assertEqual({ok, string_test}, evedis:create(string_test, [])),
+
+    %%----------------------------------------------------------------
     %% getcsv
     %%----------------------------------------------------------------
 
     ?assertEqual([<<"foo">>, <<"bar">>, <<"bat">>],
-		 evedis_string:getcsv(<<"foo,bar,bat">>)),
+		 evedis_string:getcsv(string_test, <<"foo,bar,bat">>)),
 
     %%----------------------------------------------------------------
     %% strip_tag
@@ -78,6 +84,7 @@ test_evedis_string(_Config) ->
 
     ?assertEqual(<<"foo">>, 
 		 evedis_string:strip_tag(
+		   string_test, 
 		   <<"<html><body>foo</body></html>">>)),
     
     %%----------------------------------------------------------------
@@ -85,28 +92,39 @@ test_evedis_string(_Config) ->
     %%----------------------------------------------------------------
 
     ?assertEqual([<<"f">>, <<"o">>, <<"o">>],
-		 evedis_string:str_split(<<"foo">>)),
+		 evedis_string:str_split(string_test, <<"foo">>)),
 
     %%----------------------------------------------------------------
     %% size_fmt
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"0.1 KB">>, evedis_string:size_fmt(<<"99">>)),
-    ?assertEqual(<<"976.5 KB">>, evedis_string:size_fmt(<<"999999">>)),
-    ?assertEqual(<<"93.1 GB">>, evedis_string:size_fmt(<<"99999999999">>)),
+    ?assertEqual(<<"0.1 KB">>, evedis_string:size_fmt(string_test, 
+						      <<"99">>)),
+
+    ?assertEqual(<<"976.5 KB">>, evedis_string:size_fmt(string_test, 
+							<<"999999">>)),
+
+    ?assertEqual(<<"93.1 GB">>, evedis_string:size_fmt(string_test, 
+						       <<"99999999999">>)),
 
     %%----------------------------------------------------------------
     %% soundex
     %%----------------------------------------------------------------
     
-    ?assertEqual(<<"F000">>, evedis_string:soundex(<<"foo">>)),
-    ?assertEqual(<<"B600">>, evedis_string:soundex(<<"bar">>)),
+    ?assertEqual(<<"F000">>, evedis_string:soundex(string_test, 
+						   <<"foo">>)),
+
+    ?assertEqual(<<"B600">>, evedis_string:soundex(string_test, 
+						   <<"bar">>)),
     
     %%----------------------------------------------------------------
     %% base64 and base64_dec
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"Zm9v">>, evedis_string:base64(<<"foo">>)),
-    ?assertEqual(<<"foo">>, evedis_string:base64_dec(<<"Zm9v">>)),
+    ?assertEqual(<<"Zm9v">>, evedis_string:base64(string_test, 
+						  <<"foo">>)),
+
+    ?assertEqual(<<"foo">>, evedis_string:base64_dec(string_test, 
+						     <<"Zm9v">>)),
 
     ok.

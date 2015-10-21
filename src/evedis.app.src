@@ -9,6 +9,6 @@
                  ]},
   {mod, {evedis_app, []}},
   {env, [
-	 {storage, memory} %% memory | disk
+
 	]}
  ]}.

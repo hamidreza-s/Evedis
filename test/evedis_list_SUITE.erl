@@ -66,35 +66,51 @@ end_per_testcase(_TestCase, Config) ->
 test_evedis_list(_Config) ->
     
     %%----------------------------------------------------------------
+    %% create database
+    %%----------------------------------------------------------------
+
+    ?assertEqual({ok, list_test}, evedis:create(list_test, [])),
+
+    %%----------------------------------------------------------------
     %% push
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"5">>, evedis_list:push(<<"foo">>, [<<"bar">>,
+    ?assertEqual(<<"5">>, evedis_list:push(list_test, 
+					   <<"foo">>, [<<"bar">>,
 						       <<"bat">>,
 						       <<"ban">>,
 						       <<"ban">>,
 						       <<"ban">>])),
-
+    
     %%----------------------------------------------------------------
     %% index
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"bar">>, evedis_list:index(<<"foo">>, <<"0">>)),
-    ?assertEqual(<<"bat">>, evedis_list:index(<<"foo">>, <<"1">>)),
-    ?assertEqual(<<"ban">>, evedis_list:index(<<"foo">>, <<"2">>)),
-    ?assertEqual(<<"ban">>, evedis_list:index(<<"foo">>, <<"3">>)),
-    ?assertEqual(<<"ban">>, evedis_list:index(<<"foo">>, <<"4">>)),
+    ?assertEqual(<<"bar">>, evedis_list:index(list_test, 
+					      <<"foo">>, <<"0">>)),
+
+    ?assertEqual(<<"bat">>, evedis_list:index(list_test, 
+					      <<"foo">>, <<"1">>)),
+
+    ?assertEqual(<<"ban">>, evedis_list:index(list_test, 
+					      <<"foo">>, <<"2">>)),
+
+    ?assertEqual(<<"ban">>, evedis_list:index(list_test, 
+					      <<"foo">>, <<"3">>)),
+    
+    ?assertEqual(<<"ban">>, evedis_list:index(list_test, 
+					      <<"foo">>, <<"4">>)),
 
     %%----------------------------------------------------------------
     %% pop
     %%----------------------------------------------------------------
     
-    ?assertEqual(<<"bar">>, evedis_list:pop(<<"foo">>)),
+    ?assertEqual(<<"bar">>, evedis_list:pop(list_test, <<"foo">>)),
 
     %%----------------------------------------------------------------
     %% len
     %%----------------------------------------------------------------
 
-    ?assertEqual(<<"4">>, evedis_list:len(<<"foo">>)),
+    ?assertEqual(<<"4">>, evedis_list:len(list_test, <<"foo">>)),
 
     ok.

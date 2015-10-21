@@ -1,8 +1,8 @@
 -module(evedis_set).
 
--export([add/2, ismember/2, pop/1, peek/1,
-	 top/1, 'rem'/2, members/1, diff/1, 
-	 inter/1, len/1]).
+-export([add/3, ismember/3, pop/2, peek/2,
+	 top/2, 'rem'/3, members/2, diff/2, 
+	 inter/2, len/2]).
 
 %%====================================================================
 %% Set Built-in Functions (BIFs)
@@ -14,12 +14,12 @@
 %% Add the specified members to the set stored at key.
 %% @end
 %%--------------------------------------------------------------------
-add(Key, MemberList) ->
-    do_add(MemberList, <<"SADD ", Key/binary>>).
-do_add([Member|Tail], Cmd) ->
-    do_add(Tail, <<Cmd/binary, " ", Member/binary>>);
-do_add([], Cmd) ->
-    evedis:command(Cmd).
+add(DBName, Key, MemberList) ->
+    do_add(DBName, MemberList, <<"SADD ", Key/binary>>).
+do_add(DBName, [Member|Tail], Cmd) ->
+    do_add(DBName, Tail, <<Cmd/binary, " ", Member/binary>>);
+do_add(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -27,8 +27,9 @@ do_add([], Cmd) ->
 %% Returns if member is a member of the set stored at key.
 %% @end
 %%--------------------------------------------------------------------
-ismember(Key, Member) ->
-    evedis:command(<<"SISMEMBER ", Key/binary, " ", Member/binary>>).
+ismember(DBName, Key, Member) ->
+    evedis:command(DBName, 
+		   <<"SISMEMBER ", Key/binary, " ", Member/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -36,8 +37,8 @@ ismember(Key, Member) ->
 %% Removes and returns the last record from the set value stored at key.
 %% @end
 %%--------------------------------------------------------------------
-pop(Key) ->
-    evedis:command(<<"SPOP ", Key/binary>>).
+pop(DBName, Key) ->
+    evedis:command(DBName, <<"SPOP ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -45,8 +46,8 @@ pop(Key) ->
 %% Returns the last record from the set value stored at key.
 %% @end
 %%--------------------------------------------------------------------
-peek(Key) ->
-    evedis:command(<<"SPEEK ", Key/binary>>).
+peek(DBName, Key) ->
+    evedis:command(DBName, <<"SPEEK ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -54,8 +55,8 @@ peek(Key) ->
 %% Returns the first record from the set value stored at key.
 %% @end
 %%--------------------------------------------------------------------
-top(Key) ->
-    evedis:command(<<"STOP ", Key/binary>>).
+top(DBName, Key) ->
+    evedis:command(DBName, <<"STOP ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -63,12 +64,12 @@ top(Key) ->
 %% Remove the specified members from the set stored at key.
 %% @end
 %%--------------------------------------------------------------------
-'rem'(Key, MemberList) ->
-    do_rem(MemberList, <<"SREM ", Key/binary>>).
-do_rem([Member|Tail], Cmd) ->
-    do_rem(Tail, <<Cmd/binary, " ", Member/binary>>);
-do_rem([], Cmd) ->
-    evedis:command(Cmd).
+'rem'(DBName, Key, MemberList) ->
+    do_rem(DBName, MemberList, <<"SREM ", Key/binary>>).
+do_rem(DBName, [Member|Tail], Cmd) ->
+    do_rem(DBName, Tail, <<Cmd/binary, " ", Member/binary>>);
+do_rem(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -76,8 +77,8 @@ do_rem([], Cmd) ->
 %% Returns all the members of the set value stored at key.
 %% @end
 %%--------------------------------------------------------------------
-members(Key) ->
-    evedis:command(<<"SMEMBERS ", Key/binary>>).
+members(DBName, Key) ->
+    evedis:command(DBName, <<"SMEMBERS ", Key/binary>>).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -86,12 +87,12 @@ members(Key) ->
 %% between the first set and all the successive sets.
 %% @end
 %%--------------------------------------------------------------------
-diff(Keys) ->
-    do_diff(Keys, <<"SDIFF">>).
-do_diff([Key|Tail], Cmd) ->
-    do_diff(Tail, <<Cmd/binary, " ", Key/binary>>);
-do_diff([], Cmd) ->
-    evedis:command(Cmd).
+diff(DBName, Keys) ->
+    do_diff(DBName, Keys, <<"SDIFF">>).
+do_diff(DBName, [Key|Tail], Cmd) ->
+    do_diff(DBName, Tail, <<Cmd/binary, " ", Key/binary>>);
+do_diff(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -100,12 +101,12 @@ do_diff([], Cmd) ->
 %% of all the given sets.
 %% @end
 %%--------------------------------------------------------------------
-inter(Keys) ->
-    do_inter(Keys, <<"SINTER">>).
-do_inter([Key|Tail], Cmd) ->
-    do_inter(Tail, <<Cmd/binary, " ", Key/binary>>);
-do_inter([], Cmd) ->
-    evedis:command(Cmd).
+inter(DBName, Keys) ->
+    do_inter(DBName, Keys, <<"SINTER">>).
+do_inter(DBName, [Key|Tail], Cmd) ->
+    do_inter(DBName, Tail, <<Cmd/binary, " ", Key/binary>>);
+do_inter(DBName, [], Cmd) ->
+    evedis:command(DBName, Cmd).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -114,5 +115,5 @@ do_inter([], Cmd) ->
 %% of the set stored at key.
 %% @end
 %%--------------------------------------------------------------------
-len(Key) ->
-    evedis:command(<<"SLEN ", Key/binary>>).
+len(DBName, Key) ->
+    evedis:command(DBName, <<"SLEN ", Key/binary>>).
