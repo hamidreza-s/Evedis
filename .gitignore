@@ -8,6 +8,7 @@ logs
 .DS_Store
 erl_crash.dump
 test/logs
+doc
 *.o
 *.d
 *.so

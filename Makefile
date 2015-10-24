@@ -1,4 +1,4 @@
-.PHONY: all compile deps clean live
+.PHONY: all compile doc test deps clean live
 
 all: compile
 
@@ -10,6 +10,9 @@ deps:
 
 compile: deps
 	@exec rebar compile
+
+doc:
+	@exec rebar doc
 
 live: compile
 	@exec erl -pa ./ebin -s evedis

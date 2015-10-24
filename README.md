@@ -32,12 +32,13 @@ Quick Start
 
 **Installation**
 
-In a machine that has an installed Erlang, just clone this repository and run *make live* command. For functionality testing you can also use *make test*.
+In a machine that has an installed Erlang, just clone this repository and run *make live* command. For functionality testing you can run *make test* command and *make doc* for generating its documents.
 
 ```bash
 $ git clone https://github.com/hamidreza-s/Evedis.git
 $ cd Evedis
 $ make test # optional
+$ make doc # optional
 $ make live
 ```
 
@@ -79,3 +80,39 @@ not_found = evedis_kv:get(bar, <<"db_name">>).
 ```
 
 As well as *evedis_kv* module which is responsible for **Key/Value** API, *evedis_hash*, *evedis_list* and *evedis_set* modules are responsible for **Hash**, **List** and **Set** API respectively.
+
+API
+-----
+
+The full API list as well as its *types* and *specs* are listed as follows:
+
+**Evedis Types**
+
+```erlang
+-type db() :: atom().
+-type param() :: binary().
+-type result() :: binary() | not_found.
+-type return() :: result() | [result()].
+```
+
+**Key/Value Specifications**
+
+```erlang
+-spec append(DBName::db(), Key::param(), Val::param()) -> return(). 
+-spec copy(DBName::db(), OldKey::param(), NewVal::param()) -> return().
+-spec decr(DBName:db(), Key::param()) -> return().
+-spec decrby(DBName:db(), Key::param(), Decr::param()) -> return().
+-spec del(DBName::db(), Key::param()) -> return().
+-spec exists(DBName::db(), Key::param()) -> return().
+-spec get(DBName::db(), Key::param()) -> return().
+-spec getset(DBName::db(), Key::param(), Val::param) -> return().
+-spec incr(DBName::db(), Key::param()) -> return().
+-spec incrby(DBName::db(), Key::param(), Incr::param()) -> return().
+-spec mget(DBName::db(), KeyList::[param()]) -> return().
+-spec move(DBName::db(), OldKey::param(), NewVal::param()) -> return().
+-spec mset(DBName::db(), KeyValList::[{param(), param()}]) -> return().
+-spec msetnx(DBName::db(), KeyValList::[{param(), param()}]) -> return().
+-spec set(DBName::db(), Key::param(), Val::param()) -> return().
+-spec setnx(DBName::db(), Key::param(), Val::param()) -> return().
+-spec strlen(DBName::db(), Key::param()) -> return().
+```
