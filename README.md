@@ -22,19 +22,19 @@ Features
 - Support Terabyte sized databases. 
 
 **Evedis Features**
-- Support for creating multiple database
-- Support for concurrent read and write on multiple database
-- Implemented all Vedis commands
-- Well test and fully documented code
+- Support for creating multiple databases.
+- Support for concurrent read and write on multiple databases.
+- Implemented all Vedis commands.
+- Well tested and fully documented code.
 
 Quick Start
 -----
 
 **Installation**
 
-In a machine that has an installed Erlang, just clone this repository and run *make live* command. For functionality testing you can run *make test* command and *make doc* for generating its documents.
+In a machine that has an installed Erlang, just clone this repository and run `make live` command. For functionality testing you can run `make test` command and `make doc` for generating its documents.
 
-```bash
+```sh
 $ git clone https://github.com/hamidreza-s/Evedis.git
 $ cd Evedis
 $ make test # optional
@@ -42,7 +42,7 @@ $ make doc # optional
 $ make live
 ```
 
-After last command you will be attached to Erlang console which has just loaded **evedis** NIF shared object file. Then lets write some commands to get into it quickly.
+After last command you will be attached to Erlang console which has just loaded `evedis.so` NIF shared object file. Then lets write some commands to get into it quickly.
 
 ```erlang
 
@@ -74,45 +74,76 @@ not_found = evedis_kv:get(bar, <<"db_name">>).
 
 %% increment and decrement a value
 <<"1">> = evedis_kv:incr(foo, <<"counter">>).
-<<"5">> = evedis_kv:incrby(foo, <<"conter">>, 4).
+<<"5">> = evedis_kv:incrby(foo, <<"conter">>, <<"4">>).
 <<"4">> = evedis_kv:decr(foo, <<"counter">>).
-<<"2">> = evedis_kv:decrby(foo, <<"counter">>, 2).
+<<"2">> = evedis_kv:decrby(foo, <<"counter">>, <<"2">>).
 ```
 
-As well as *evedis_kv* module which is responsible for **Key/Value** API, *evedis_hash*, *evedis_list* and *evedis_set* modules are responsible for **Hash**, **List** and **Set** API respectively.
+To see more examples you can check `test` directory. It contains lots of examples for all the commands.
 
 API
 -----
 
-The full API list as well as its *types* and *specs* are listed as follows:
+As well as `evedis_kv` module which is responsible for **Key/Value** API, `evedis_hash`, `evedis_list` and `evedis_set` modules are responsible for **Hash**, **List** and **Set** API respectively.
 
-**Evedis Types**
-
-```erlang
--type db() :: atom().
--type param() :: binary().
--type result() :: binary() | not_found.
--type return() :: result() | [result()].
-```
-
-**Key/Value Specifications**
+**Key/Value**
 
 ```erlang
--spec append(DBName::db(), Key::param(), Val::param()) -> return(). 
--spec copy(DBName::db(), OldKey::param(), NewVal::param()) -> return().
--spec decr(DBName:db(), Key::param()) -> return().
--spec decrby(DBName:db(), Key::param(), Decr::param()) -> return().
--spec del(DBName::db(), Key::param()) -> return().
--spec exists(DBName::db(), Key::param()) -> return().
--spec get(DBName::db(), Key::param()) -> return().
--spec getset(DBName::db(), Key::param(), Val::param) -> return().
--spec incr(DBName::db(), Key::param()) -> return().
--spec incrby(DBName::db(), Key::param(), Incr::param()) -> return().
--spec mget(DBName::db(), KeyList::[param()]) -> return().
--spec move(DBName::db(), OldKey::param(), NewVal::param()) -> return().
--spec mset(DBName::db(), KeyValList::[{param(), param()}]) -> return().
--spec msetnx(DBName::db(), KeyValList::[{param(), param()}]) -> return().
--spec set(DBName::db(), Key::param(), Val::param()) -> return().
--spec setnx(DBName::db(), Key::param(), Val::param()) -> return().
--spec strlen(DBName::db(), Key::param()) -> return().
+-module(evedis_kv).
+-export([get/2, set/3, setnx/3, del/2, 
+	 append/3, exists/2, strlen/2, copy/3, 
+	 move/3, mget/2, mset/2, msetnx/2,
+	 getset/3, incr/2, decr/2, incrby/3,
+	 decrby/3]).
 ```
+
+**List**
+
+```erlang
+-module(evedis_list).
+-export([index/3, len/2, pop/2, push/3]).
+```
+
+**Set**
+
+```erlang
+-module(evedis_set).
+-export([add/3, ismember/3, pop/2, peek/2,
+	 top/2, 'rem'/3, members/2, diff/2, 
+	 inter/2, len/2]).
+```
+
+**Hash**
+
+```erlang
+-module(evedis_hash).
+-export([get/3, set/4, del/3, len/2,
+	 exists/3, mget/3, keys/2, vals/2,
+	 getall/2, mset/3, setnx/4]).
+```
+
+**String**
+
+```erlang
+-module(evedis_string).
+-export([getcsv/2, strip_tag/2, str_split/2, size_fmt/2,
+	 soundex/2, base64/2, base64_dec/2]).
+```
+
+**Misc**
+
+```erlang
+-module(evedis_misc).
+-export([rand/3, getrandmax/1, randstr/2, time/1,
+	date/1, os/1, echo/2, abort/1, cmd_list/1,
+	table_list/1, vedis/1, commit/1, rollback/1,
+	'begin'/1]).
+```
+
+For generating a detailed API list with descriptions run `make doc` command.
+
+
+Contribution
+-----
+
+Comments, contributions and patches are greatly appreciated.
